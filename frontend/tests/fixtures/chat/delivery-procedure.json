@@ -1,0 +1,65 @@
+{
+  "answer": "To receive a delivery: verify the packing slip against the purchase order before opening any pallet, inspect for visible damage and log exceptions on the receiving form, then route the delivery to its assigned dock lane.",
+  "answer_citation_ids": ["cit-recv-001", "cit-recv-002"],
+  "status": "answered",
+  "citations": [
+    {
+      "citation_id": "cit-recv-001",
+      "document_id": "sop-receiving",
+      "version": "3",
+      "section_id": "sec-2",
+      "title": "Receiving Deliveries — Dock Intake",
+      "quoted_text": "Verify the packing slip against the purchase order before opening any pallet. Route confirmed deliveries to the assigned dock lane.",
+      "source_uri": "/sops/sop-receiving/sections/sec-2?version=3"
+    },
+    {
+      "citation_id": "cit-recv-002",
+      "document_id": "sop-receiving",
+      "version": "3",
+      "section_id": "sec-3",
+      "title": "Receiving Deliveries — Damage Inspection",
+      "quoted_text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
+      "source_uri": "/sops/sop-receiving/sections/sec-3?version=3"
+    }
+  ],
+  "procedure_result": {
+    "state": "complete",
+    "document_id": "sop-receiving",
+    "version": "3",
+    "section_id": "sec-2",
+    "title": "Receiving Deliveries",
+    "is_current": true,
+    "steps": [
+      {
+        "step_id": "step-1",
+        "order": 1,
+        "original_text": "Verify the packing slip against the purchase order before opening any pallet.",
+        "explanation": "Check that what's on the packing slip matches what was ordered before you break down the pallet.",
+        "is_mandatory": true,
+        "citation_ids": ["cit-recv-001"]
+      },
+      {
+        "step_id": "step-2",
+        "order": 2,
+        "original_text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
+        "explanation": "Look the pallet over for damage and write down anything unusual on the receiving form before you shelve it.",
+        "is_mandatory": true,
+        "warning": "Do not stock a pallet with unresolved damage exceptions.",
+        "citation_ids": ["cit-recv-002"]
+      },
+      {
+        "step_id": "step-3",
+        "order": 3,
+        "original_text": "Route confirmed deliveries to the assigned dock lane.",
+        "explanation": "Once it's checked in, move the delivery to its assigned dock lane.",
+        "is_mandatory": true,
+        "citation_ids": ["cit-recv-001"]
+      }
+    ]
+  },
+  "inventory_result": null,
+  "clarification": null,
+  "error": null,
+  "trace_id": "trace-fixture-delivery-procedure",
+  "data_mode": "synthetic"
+}

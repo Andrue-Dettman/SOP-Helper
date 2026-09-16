@@ -1,0 +1,9 @@
+{
+  "document_id": "sop-receiving",
+  "version": "3",
+  "section_id": "sec-2",
+  "title": "Receiving Deliveries — Dock Intake",
+  "text": "Verify the packing slip against the purchase order before opening any pallet. Confirm quantities and part numbers line by line. Route confirmed deliveries to the assigned dock lane. Do not break down a pallet before verification is complete.",
+  "source_uri": "/sops/sop-receiving/sections/sec-2?version=3",
+  "is_current": true
+}

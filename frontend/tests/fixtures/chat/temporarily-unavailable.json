@@ -1,0 +1,16 @@
+{
+  "answer": null,
+  "answer_citation_ids": [],
+  "status": "temporarily_unavailable",
+  "citations": [],
+  "procedure_result": null,
+  "inventory_result": null,
+  "clarification": null,
+  "error": {
+    "code": "dependency_unavailable",
+    "message": "The inventory database is temporarily unavailable.",
+    "retryable": true
+  },
+  "trace_id": "trace-fixture-temporarily-unavailable",
+  "data_mode": "synthetic"
+}
