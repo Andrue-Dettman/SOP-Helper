@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Citation } from '../api/types'
-import { resolveCitations } from './citations'
+import { buildCitationIndex, resolveCitations } from './citations'
 
 const citations: Citation[] = [
   {
@@ -36,5 +36,19 @@ describe('resolveCitations', () => {
 
   it('returns an empty array for no ids', () => {
     expect(resolveCitations([], citations)).toEqual([])
+  })
+})
+
+describe('buildCitationIndex', () => {
+  it('numbers ids by first appearance across all given lists, starting at 1', () => {
+    const index = buildCitationIndex([['cit-a'], ['cit-b', 'cit-a']])
+    expect(index.get('cit-a')).toBe(1)
+    expect(index.get('cit-b')).toBe(2)
+  })
+
+  it('assigns the same number to an id no matter which list it appears in', () => {
+    const index = buildCitationIndex([[], ['cit-b'], ['cit-b', 'cit-a']])
+    expect(index.get('cit-b')).toBe(1)
+    expect(index.get('cit-a')).toBe(2)
   })
 })
