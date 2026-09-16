@@ -1,0 +1,31 @@
+# Owned by C3 (docs/CONTRACTS.md, agents/ROSTER.md). One Postgres instance
+# per worktree, isolated by COMPOSE_PROJECT_NAME, port, and volume name so
+# no worker's `docker compose down -v` can touch another worker's data.
+#
+# Backend and frontend services are intentionally not defined here yet.
+# Adding them now would mean guessing G1's application bootstrap and C2's
+# frontend dev-server setup before either exists. They are added once
+# those worktrees land their dependency manifests; see docs/operations.md.
+
+name: ${COMPOSE_PROJECT_NAME:-warehouse-main}
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-warehouse}
+      POSTGRES_USER: ${POSTGRES_USER:-warehouse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warehouse_dev_only}
+    ports:
+      - "${POSTGRES_PORT:-5500}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-warehouse} -d ${POSTGRES_DB:-warehouse}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
