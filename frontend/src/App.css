@@ -1,0 +1,53 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-shell__header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-shell__header h1 {
+  font-size: 18px;
+}
+
+.app-shell__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-shell__chat {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  min-width: 0;
+  border-right: 1px solid var(--color-border);
+}
+
+.app-shell__evidence {
+  flex: 1;
+  min-width: 280px;
+  max-width: 420px;
+  border-left: 1px solid var(--color-border);
+}
+
+@media (max-width: 860px) {
+  .app-shell__body {
+    flex-direction: column;
+  }
+
+  .app-shell__chat {
+    border-right: none;
+  }
+
+  .app-shell__evidence {
+    max-width: none;
+    min-width: 0;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+  }
+}

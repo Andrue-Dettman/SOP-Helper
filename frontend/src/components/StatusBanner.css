@@ -1,0 +1,39 @@
+.status-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-raised);
+}
+
+.status-banner--insufficient_evidence {
+  border-color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.status-banner--temporarily_unavailable,
+.status-banner--network_error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+.status-banner__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.status-banner__message {
+  flex: 1;
+  font-size: 14px;
+}
+
+.status-banner__retry {
+  flex-shrink: 0;
+  border: 1px solid currentColor;
+  background: transparent;
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+}

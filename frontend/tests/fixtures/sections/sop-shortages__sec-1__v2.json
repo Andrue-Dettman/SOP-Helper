@@ -1,0 +1,9 @@
+{
+  "document_id": "sop-shortages",
+  "version": "2",
+  "section_id": "sec-1",
+  "title": "Handling Component Shortages",
+  "text": "When a required component is short, notify the shift supervisor before adjusting the build schedule. Do not reassign short components from another open build without supervisor approval. Record the shortage in the daily exceptions log.",
+  "source_uri": "/sops/sop-shortages/sections/sec-1?version=2",
+  "is_current": true
+}

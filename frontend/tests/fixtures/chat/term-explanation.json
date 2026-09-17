@@ -1,0 +1,40 @@
+{
+  "answer": "An exception is any damage, shortage, or mismatch you find during inspection. You record it on the receiving form instead of silently accepting the pallet.",
+  "answer_citation_ids": ["cit-recv-002"],
+  "status": "answered",
+  "citations": [
+    {
+      "citation_id": "cit-recv-002",
+      "document_id": "sop-receiving",
+      "version": "3",
+      "section_id": "sec-3",
+      "title": "Receiving Deliveries — Damage Inspection",
+      "quoted_text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
+      "source_uri": "/sops/sop-receiving/sections/sec-3?version=3"
+    }
+  ],
+  "procedure_result": {
+    "state": "complete",
+    "document_id": "sop-receiving",
+    "version": "3",
+    "section_id": "sec-3",
+    "title": "Receiving Deliveries — Damage Inspection",
+    "is_current": true,
+    "steps": [
+      {
+        "step_id": "step-2",
+        "order": 1,
+        "original_text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
+        "explanation": "An exception is any damage, shortage, or mismatch you notice. Write it on the receiving form before the pallet goes on the shelf.",
+        "is_mandatory": true,
+        "warning": "Do not stock a pallet with unresolved damage exceptions.",
+        "citation_ids": ["cit-recv-002"]
+      }
+    ]
+  },
+  "inventory_result": null,
+  "clarification": null,
+  "error": null,
+  "trace_id": "trace-fixture-term-explanation",
+  "data_mode": "synthetic"
+}

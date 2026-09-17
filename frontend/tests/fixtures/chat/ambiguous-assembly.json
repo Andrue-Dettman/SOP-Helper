@@ -1,0 +1,19 @@
+{
+  "answer": null,
+  "answer_citation_ids": [],
+  "status": "needs_clarification",
+  "citations": [],
+  "procedure_result": null,
+  "inventory_result": null,
+  "clarification": {
+    "kind": "assembly",
+    "question": "\"Kit A\" matches more than one assembly. Which one do you mean?",
+    "choices": [
+      { "id": "asm-kit-a-std", "label": "Kit A — Standard (asm-kit-a-std)" },
+      { "id": "asm-kit-a-hd", "label": "Kit A — Heavy Duty (asm-kit-a-hd)" }
+    ]
+  },
+  "error": null,
+  "trace_id": "trace-fixture-ambiguous-assembly",
+  "data_mode": "synthetic"
+}

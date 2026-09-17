@@ -1,0 +1,12 @@
+{
+  "answer": null,
+  "answer_citation_ids": [],
+  "status": "insufficient_evidence",
+  "citations": [],
+  "procedure_result": null,
+  "inventory_result": null,
+  "clarification": null,
+  "error": null,
+  "trace_id": "trace-fixture-insufficient-evidence",
+  "data_mode": "synthetic"
+}

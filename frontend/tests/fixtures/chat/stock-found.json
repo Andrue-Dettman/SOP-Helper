@@ -1,0 +1,19 @@
+{
+  "answer": "You have 32 Side Panel A in stock.",
+  "answer_citation_ids": [],
+  "status": "answered",
+  "citations": [],
+  "procedure_result": null,
+  "inventory_result": {
+    "kind": "stock",
+    "state": "ok",
+    "snapshot": { "snapshot_id": "snap-2026-09-14", "captured_at": "2026-09-14T08:00:00Z" },
+    "matches": [
+      { "part_id": "prt-panel-a", "label": "Side Panel A", "quantity": 32, "unit": "each" }
+    ]
+  },
+  "clarification": null,
+  "error": null,
+  "trace_id": "trace-fixture-stock-found",
+  "data_mode": "synthetic"
+}

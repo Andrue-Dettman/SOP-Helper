@@ -1,0 +1,38 @@
+.component-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.component-table {
+  width: 100%;
+  min-width: 420px;
+  font-size: 14px;
+}
+
+.component-table th,
+.component-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.component-table thead th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.component-table tbody tr:last-child th,
+.component-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.component-table__row--short td,
+.component-table__row--short th {
+  color: var(--color-danger);
+  font-weight: 600;
+}
