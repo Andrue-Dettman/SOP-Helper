@@ -1,9 +1,15 @@
 from pathlib import Path
+import os
 import shutil
+import sys
 
 import pytest
 
-from backend.app.ingestion.catalog import MemoryCatalog, ingest
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'backend'))
+if os.environ.get('WAREHOUSE_G1_BACKEND'):
+    sys.path.append(os.environ['WAREHOUSE_G1_BACKEND'])
+
+from app.ingestion.catalog import MemoryCatalog, ingest
 
 CORPUS = Path(__file__).resolve().parents[2] / 'data' / 'sops'
 

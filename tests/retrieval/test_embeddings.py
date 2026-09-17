@@ -2,10 +2,10 @@ from dataclasses import replace
 
 import pytest
 
-from backend.app.ingestion.catalog import (EmbeddingBatch, Generation, MemoryCatalog,
+from app.ingestion.catalog import (EmbeddingBatch, Generation, MemoryCatalog,
                                            PublicationConflict, ingest, validate_vectors)
-from backend.app.ingestion.models import SourceValidationError
-from backend.app.retrieval.service import ProcedureService
+from app.ingestion.models import SourceValidationError
+from app.retrieval.service import ProcedureService
 
 GENERATION = Generation('fixture-generation-1', 'offline-fixture', 'fixture-vectors', 2)
 

@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from backend.app.ingestion.catalog import ingest
-from backend.app.retrieval.ranking import Hit, PostgresLexicalRanker, PostgresVectorRanker, RetrievalUnavailable
-from backend.app.retrieval.service import ProcedureService, Selection
+from app.ingestion.catalog import ingest
+from app.retrieval.ranking import Hit, PostgresLexicalRanker, PostgresVectorRanker, RetrievalUnavailable
+from app.retrieval.service import ProcedureService, Selection
 
 
 class ScriptedRanker:

@@ -137,6 +137,13 @@ def _validate_supersession(documents: tuple[Document, ...]):
         visit(key)
 
 
+def corpus_revision(documents, current, generation):
+    config = None if generation is None else (generation.generation_id, generation.provider,
+                                              generation.model, generation.dimension)
+    return stable_id(json.dumps([(d.key, d.checksum) for d in documents]),
+                     json.dumps(sorted(current)), CHUNKER_VERSION, json.dumps(config))
+
+
 def ingest(root: Path, catalog: MemoryCatalog, *, generation: Generation | None = None,
            embedder: Embedder | None = None) -> Snapshot:
     if (generation is None) != (embedder is None):
@@ -170,10 +177,7 @@ def ingest(root: Path, catalog: MemoryCatalog, *, generation: Generation | None 
     _validate_supersession(documents)
     catalog.validate_immutability(documents)
     chunks = tuple(chunk for document in documents for chunk in chunk_document(document))
-    config = None if generation is None else (generation.generation_id, generation.provider,
-                                              generation.model, generation.dimension)
-    revision = stable_id(json.dumps([(d.key, d.checksum) for d in documents]),
-                         json.dumps(sorted(current)), CHUNKER_VERSION, json.dumps(config))
+    revision = corpus_revision(documents, current, generation)
     previous = catalog.snapshot()
     if previous and previous.revision == revision:
         return previous

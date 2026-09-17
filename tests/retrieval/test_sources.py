@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from backend.app.ingestion.catalog import MemoryCatalog, ingest
-from backend.app.ingestion.models import SourceValidationError
-from backend.app.ingestion.parser import chunk_document, parse_document
-from backend.app.retrieval.service import ProcedureService, Selection
+from app.ingestion.catalog import MemoryCatalog, ingest
+from app.ingestion.models import SourceValidationError
+from app.ingestion.parser import chunk_document, parse_document
+from app.retrieval.service import ProcedureService, Selection
 
 
 def source(corpus):
