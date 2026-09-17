@@ -171,7 +171,7 @@ def test_stale_database_publication_is_rejected(corpus):
     run(scenario())
 
 
-def test_schema_body_after_actual_c1_inventory_revision(corpus):
+def test_g2_migration_after_actual_c1_inventory_revision(corpus):
     migration_path = os.environ.get('WAREHOUSE_C1_MIGRATION')
     if not migration_path:
         pytest.skip('C1 migration path not configured')
@@ -179,15 +179,21 @@ def test_schema_body_after_actual_c1_inventory_revision(corpus):
     from alembic.operations import Operations
 
     def apply_inventory(connection):
-        spec = importlib.util.spec_from_file_location('g2_test_c1_revision', migration_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        assert module.revision == 'c1_0001_inventory_schema'
+        c1_spec = importlib.util.spec_from_file_location('g2_test_c1_revision', migration_path)
+        c1_module = importlib.util.module_from_spec(c1_spec)
+        c1_spec.loader.exec_module(c1_module)
+        g2_path = Path(__file__).resolve().parents[2] / 'backend/migrations/versions/g2_0002_retrieval_schema.py'
+        g2_spec = importlib.util.spec_from_file_location('g2_test_retrieval_revision', g2_path)
+        g2_module = importlib.util.module_from_spec(g2_spec)
+        g2_spec.loader.exec_module(g2_module)
+        assert c1_module.revision == 'c1_0001_inventory_schema'
+        assert g2_module.down_revision == c1_module.revision
         if not sa.inspect(connection).has_table('parts'):
             with Operations.context(MigrationContext.configure(connection)):
-                module.upgrade()
-        schema.downgrade(connection)
-        schema.upgrade(connection)
+                c1_module.upgrade()
+        with Operations.context(MigrationContext.configure(connection)):
+            g2_module.downgrade()
+            g2_module.upgrade()
         tables = set(sa.inspect(connection).get_table_names())
         assert {'parts', 'bom_lines', 'inventory_snapshot', 'sop_documents', 'sop_active_revision'} <= tables
 
