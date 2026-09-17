@@ -10,7 +10,7 @@ describe('selectScenario', () => {
   it('matches a delivery-procedure question', () => {
     const { response } = selectScenario(request('How do I receive a delivery?'))
     expect(response.status).toBe('answered')
-    expect(response.procedure_result?.document_id).toBe('sop-receiving')
+    expect(response.procedure_result?.sources[0]?.document_id).toBe('sop-receiving')
   })
 
   it('matches a term-explanation question', () => {
@@ -26,7 +26,7 @@ describe('selectScenario', () => {
 
   it('resolves a build-ready result once an assembly is selected', () => {
     const { response } = selectScenario(
-      request('Kit A — Standard', { assembly_id: 'asm-kit-a-std' }),
+      request('Kit A — Standard', { assembly_id: 'ASM-KIT-A-STD' }),
     )
     expect(response.inventory_result?.kind).toBe('build')
     if (response.inventory_result?.kind === 'build') {
@@ -67,6 +67,6 @@ describe('selectScenario', () => {
   it('falls back to the delivery-procedure fixture for an unrecognized message', () => {
     const { response } = selectScenario(request('gibberish query with no keywords'))
     expect(response.status).toBe('answered')
-    expect(response.procedure_result?.document_id).toBe('sop-receiving')
+    expect(response.procedure_result?.sources[0]?.document_id).toBe('sop-receiving')
   })
 })

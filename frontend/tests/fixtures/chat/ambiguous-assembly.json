@@ -1,5 +1,5 @@
 {
-  "answer": null,
+  "answer": "",
   "answer_citation_ids": [],
   "status": "needs_clarification",
   "citations": [],
@@ -9,8 +9,8 @@
     "kind": "assembly",
     "question": "\"Kit A\" matches more than one assembly. Which one do you mean?",
     "choices": [
-      { "id": "asm-kit-a-std", "label": "Kit A — Standard (asm-kit-a-std)" },
-      { "id": "asm-kit-a-hd", "label": "Kit A — Heavy Duty (asm-kit-a-hd)" }
+      { "id": "ASM-KIT-A-STD", "label": "Kit A — Standard (ASM-KIT-A-STD)" },
+      { "id": "ASM-KIT-A-HD", "label": "Kit A — Heavy Duty (ASM-KIT-A-HD)" }
     ]
   },
   "error": null,

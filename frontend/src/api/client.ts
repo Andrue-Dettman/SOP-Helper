@@ -1,5 +1,5 @@
 import { selectScenario } from './mockScenarios'
-import type { ChatRequest, ChatResponse, SopSection } from './types'
+import type { ChatRequest, ChatResponse, SopSection, ValidationErrorResponse } from './types'
 
 const sectionFixtures = import.meta.glob<{ default: SopSection }>(
   '../../tests/fixtures/sections/*.json',
@@ -50,8 +50,24 @@ export function createLiveClient(baseUrl: string): ApiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
       })
-      if (!res.ok) {
-        throw new Error(`Chat request failed with status ${res.status}`)
+      // Per the real API, 200/500/503/504 all use the ChatResponse envelope
+      // (see docs/CONTRACTS.md: "Exception handlers use the same response
+      // envelope where possible"). Only 422 (our own request was invalid)
+      // uses a distinct ValidationErrorResponse without answer/status.
+      if (res.status === 422) {
+        const body = (await res.json()) as ValidationErrorResponse
+        return {
+          answer: '',
+          answer_citation_ids: [],
+          status: 'temporarily_unavailable',
+          citations: [],
+          procedure_result: null,
+          inventory_result: null,
+          clarification: null,
+          error: body.error,
+          trace_id: body.trace_id,
+          data_mode: body.data_mode,
+        }
       }
       return (await res.json()) as ChatResponse
     },

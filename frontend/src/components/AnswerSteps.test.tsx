@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AnswerSteps } from './AnswerSteps'
 import { buildCitationIndex } from '../lib/citations'
@@ -18,37 +18,42 @@ const citations: Citation[] = [
 ]
 
 const procedureResult: ProcedureResult = {
-  state: 'complete',
-  document_id: 'sop-receiving',
-  version: '3',
-  section_id: 'sec-2',
-  title: 'Receiving Deliveries',
-  is_current: true,
+  state: 'ok',
+  sources: [{ document_id: 'sop-receiving', version: '3', section_id: 'sec-2', is_current: true }],
+  prerequisites: [{ id: 'pre-1', text: 'Have the delivery note ready.', citation_ids: [] }],
+  warnings: [
+    {
+      warning_id: 'warn-1',
+      text: 'Do not stock a pallet with unresolved damage exceptions.',
+      applies_to_step_ids: ['step-2'],
+      citation_ids: [],
+    },
+  ],
+  explanation: null,
+  fallback_used: false,
   steps: [
     {
       step_id: 'step-1',
-      order: 1,
-      original_text: 'Verify the packing slip against the purchase order.',
+      ordinal: 1,
+      text: 'Verify the packing slip against the purchase order.',
       explanation: 'Check the slip matches what was ordered.',
-      is_mandatory: true,
       citation_ids: ['cit-recv-001'],
     },
     {
       step_id: 'step-2',
-      order: 2,
-      original_text: 'Log any exceptions before stocking.',
-      is_mandatory: true,
-      warning: 'Do not stock a pallet with unresolved damage exceptions.',
+      ordinal: 2,
+      text: 'Log any exceptions before stocking.',
       citation_ids: [],
     },
   ],
 }
 
-function renderSteps(onActivateCitation = vi.fn()) {
-  const citationIndex = buildCitationIndex([procedureResult.steps.map((s) => s.citation_ids).flat()])
+function renderSteps(overrides: Partial<ProcedureResult> = {}, onActivateCitation = vi.fn()) {
+  const result = { ...procedureResult, ...overrides }
+  const citationIndex = buildCitationIndex([result.steps.flatMap((s) => s.citation_ids)])
   return render(
     <AnswerSteps
-      procedureResult={procedureResult}
+      procedureResult={result}
       citations={citations}
       citationIndex={citationIndex}
       activeCitationId={null}
@@ -60,8 +65,9 @@ function renderSteps(onActivateCitation = vi.fn()) {
 describe('AnswerSteps', () => {
   it('renders one ordered list item per step', () => {
     renderSteps()
-    const items = screen.getAllByRole('listitem')
-    expect(items).toHaveLength(2)
+    const list = document.querySelector('.answer-steps__list')
+    expect(list).not.toBeNull()
+    expect(within(list as HTMLElement).getAllByRole('listitem')).toHaveLength(2)
   })
 
   it('shows the plain-language explanation by default when one exists', () => {
@@ -81,19 +87,43 @@ describe('AnswerSteps', () => {
     expect(screen.queryByText('Check the slip matches what was ordered.')).not.toBeInTheDocument()
   })
 
-  it('keeps the mandatory warning visible regardless of toggle state', () => {
+  it('shows a warning next to the step it applies to', () => {
     renderSteps()
     expect(screen.getByText(/do not stock a pallet/i)).toBeInTheDocument()
   })
 
-  it('marks a mandatory step as required in text, not color alone', () => {
+  it('shows a warning that applies to no listed step in a general section instead of dropping it', () => {
+    renderSteps({
+      warnings: [
+        {
+          warning_id: 'warn-general',
+          text: 'General caution applies throughout.',
+          applies_to_step_ids: ['step-does-not-exist'],
+          citation_ids: [],
+        },
+      ],
+    })
+    expect(screen.getByText('General caution applies throughout.')).toBeInTheDocument()
+  })
+
+  it('shows prerequisites before the steps', () => {
     renderSteps()
-    expect(screen.getAllByText(/required/i).length).toBeGreaterThan(0)
+    expect(screen.getByText('Have the delivery note ready.')).toBeInTheDocument()
+  })
+
+  it('shows the overall explanation when present', () => {
+    renderSteps({ explanation: 'Overall, follow the receiving checklist.' })
+    expect(screen.getByText('Overall, follow the receiving checklist.')).toBeInTheDocument()
+  })
+
+  it('discloses when the plain-language draft fell back to original wording', () => {
+    renderSteps({ fallback_used: true })
+    expect(screen.getByText(/didn.t pass a preservation check/i)).toBeInTheDocument()
   })
 
   it('renders a numbered citation chip that resolves and activates the right citation', async () => {
     const onActivateCitation = vi.fn()
-    renderSteps(onActivateCitation)
+    renderSteps({}, onActivateCitation)
     const chip = screen.getByRole('button', { name: /dock intake/i })
     expect(chip).toHaveTextContent('1')
     await userEvent.click(chip)

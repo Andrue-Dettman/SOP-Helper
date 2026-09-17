@@ -8,14 +8,13 @@
     "kind": "build",
     "state": "ok",
     "snapshot": { "snapshot_id": "snap-2026-09-14", "captured_at": "2026-09-14T08:00:00Z" },
-    "assembly_id": "asm-kit-a-std",
-    "assembly_label": "Kit A — Standard",
+    "assembly_id": "ASM-KIT-A-STD",
     "requested_units": 20,
     "ready": true,
     "components": [
-      { "part_id": "prt-bracket-01", "label": "Mounting Bracket", "per_assembly": 2, "required": 40, "available": 120, "shortage": 0 },
-      { "part_id": "prt-bolt-m6", "label": "M6 Bolt", "per_assembly": 8, "required": 160, "available": 500, "shortage": 0 },
-      { "part_id": "prt-panel-a", "label": "Side Panel A", "per_assembly": 1, "required": 20, "available": 32, "shortage": 0 }
+      { "part_id": "MOUNTING-BRACKET", "per_assembly": 2, "required": 40, "available": 120, "shortage": 0 },
+      { "part_id": "M6-BOLT", "per_assembly": 8, "required": 160, "available": 500, "shortage": 0 },
+      { "part_id": "SIDE-PANEL-A", "per_assembly": 1, "required": 20, "available": 32, "shortage": 0 }
     ]
   },
   "clarification": null,

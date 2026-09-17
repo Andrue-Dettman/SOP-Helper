@@ -32,8 +32,12 @@ export function EvidencePanel({ citation, apiClient, onClose }: EvidencePanelPro
   async function handleViewFullSection() {
     if (!citation) return
     setFullSection({ status: 'loading' })
-    const section = await apiClient.getSection(citation.document_id, citation.section_id, citation.version)
-    setFullSection(section ? { status: 'loaded', section } : { status: 'unavailable' })
+    try {
+      const section = await apiClient.getSection(citation.document_id, citation.section_id, citation.version)
+      setFullSection(section ? { status: 'loaded', section } : { status: 'unavailable' })
+    } catch {
+      setFullSection({ status: 'unavailable' })
+    }
   }
 
   return (

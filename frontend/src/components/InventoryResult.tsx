@@ -46,7 +46,7 @@ export function InventoryResult({ result }: InventoryResultProps) {
       {result.kind === 'build' ? (
         <>
           <h3>
-            {result.assembly_label} — {result.requested_units} units
+            {result.assembly_id} — {result.requested_units} units
           </h3>
           <ReadinessBanner ready={result.ready} />
           <ComponentTable components={result.components} />
@@ -58,15 +58,17 @@ export function InventoryResult({ result }: InventoryResultProps) {
             {result.matches.map((match) => (
               <li key={match.part_id}>
                 <span>{match.label}</span>
-                <span>{match.quantity === null ? 'Unknown' : `${match.quantity} ${match.unit}`}</span>
+                <span>{match.available === null ? 'Unknown' : `${match.available} ${match.unit}`}</span>
               </li>
             ))}
           </ul>
         </>
       )}
-      <p className="inventory-result__snapshot">
-        Data snapshot {result.snapshot.snapshot_id} · captured {formatCapturedAt(result.snapshot.captured_at)}
-      </p>
+      {result.snapshot && (
+        <p className="inventory-result__snapshot">
+          Data snapshot {result.snapshot.snapshot_id} · captured {formatCapturedAt(result.snapshot.captured_at)}
+        </p>
+      )}
     </section>
   )
 }

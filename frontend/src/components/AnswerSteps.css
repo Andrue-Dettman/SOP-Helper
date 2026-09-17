@@ -33,19 +33,28 @@
   margin: 0;
 }
 
-.answer-steps__meta {
-  display: flex;
-  gap: var(--space-2);
+.answer-steps__intro {
+  margin: 0;
 }
 
-.answer-steps__tag {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+.answer-steps__fallback-note {
+  margin: 0;
+  font-size: 12px;
   color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 1px 8px;
+  font-style: italic;
+}
+
+.answer-steps__prerequisites-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-1);
+}
+
+.answer-steps__prerequisites ul {
+  list-style: disc;
+  padding-left: var(--space-5);
 }
 
 .answer-steps__warning {
