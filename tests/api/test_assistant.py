@@ -262,3 +262,43 @@ async def test_model_cannot_turn_conflicting_procedures_into_user_choice(service
     provider = FakeProvider([ProviderTurn(tool_calls=[call("search_procedures", query="receiving")]), ProviderTurn(draft=draft)])
     response, _ = await Assistant(services, provider).run(ChatRequest(message="Receiving?"))
     assert response.status == "insufficient_evidence" and response.clarification is None
+
+
+async def test_evaluation_trace_counts_retry_attempts_and_logical_operations(services):
+    provider = FakeProvider([DependencyFailure("provider_unavailable", retryable=True),
+                             ProviderTurn(tool_calls=[call("lookup_stock", part_query="P1")])])
+    assistant = Assistant(services, provider)
+    response, status = await assistant.run(ChatRequest(message="Stock?"))
+    trace = assistant.traces.records[str(response.trace_id)]
+    assert status == 200 and trace["model_attempts"] == 3
+    assert trace["tool_attempts"] == [{"name": "lookup_stock", "dispatched": True, "arguments_valid": True}]
+    dependencies = trace["dependency_attempts"]
+    assert len(dependencies) == 4
+    assert dependencies[0]["operation_id"] == dependencies[1]["operation_id"]
+    assert dependencies[0]["retry_reason"] is None and dependencies[1]["retry_reason"] == "transient"
+    assert len({d["operation_id"] for d in dependencies}) == 3
+    assert 0 <= trace["elapsed_ms"] <= 30000
+    assert all(0 <= d["duration_ms"] <= 10000 for d in dependencies)
+
+
+async def test_evaluation_trace_records_rejected_tools_without_dependency_dispatch(services):
+    assistant = Assistant(services, FakeProvider([ProviderTurn(tool_calls=[call("execute_sql", sql="secret")])]))
+    response, _ = await assistant.run(ChatRequest(message="Stock?"))
+    trace = assistant.traces.records[str(response.trace_id)]
+    assert trace["model_attempts"] == 1
+    assert trace["tool_attempts"] == [{"name": "execute_sql", "dispatched": False, "arguments_valid": False}]
+    assert [d["name"] for d in trace["dependency_attempts"]] == ["model"]
+    assert "secret" not in json.dumps(trace)
+
+
+async def test_trace_keeps_actual_timeout_duration_instead_of_clamping_to_budget(services):
+    async def slow(*args, **kwargs):
+        await asyncio.sleep(1)
+    services.lookup_stock = slow
+    assistant = Assistant(services, FakeProvider([ProviderTurn(tool_calls=[call("lookup_stock", part_query="P1")])]),
+                          limits=Limits(total_seconds=.01))
+    response, status = await assistant.run(ChatRequest(message="Stock?"))
+    trace = assistant.traces.records[str(response.trace_id)]
+    assert status == 504
+    assert trace["elapsed_ms"] >= 10
+    assert trace["tool_attempts"][0]["dispatched"] is True

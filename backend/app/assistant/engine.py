@@ -62,8 +62,24 @@ class TraceStore:
         self.capacity = capacity
         self.records = OrderedDict()
 
-    def save(self, trace_id: str, events: list[dict], execution_mode: str):
-        self.records[trace_id] = {"execution_mode": execution_mode, "events": events[:64]}
+    def save(self, trace_id: str, events: list[dict], execution_mode: str, *, elapsed_ms: float):
+        summary = events[-1]
+        self.records[trace_id] = {
+            "execution_mode": execution_mode,
+            "model_attempts": summary["model_calls"],
+            "tool_attempts": [
+                {"name": event["operation"], "dispatched": event["dispatched"],
+                 "arguments_valid": event["arguments_valid"]}
+                for event in events if "dispatched" in event
+            ],
+            "elapsed_ms": elapsed_ms,
+            "dependency_attempts": [
+                {"operation_id": event["operation_id"], "name": event["operation"],
+                 "duration_ms": event["elapsed_ms"], "retry_reason": event["retry_reason"]}
+                for event in events if "operation_id" in event
+            ],
+            "events": events[:64],
+        }
         while len(self.records) > self.capacity:
             self.records.popitem(last=False)
 
@@ -74,6 +90,7 @@ class Budget:
         self.started = time.monotonic()
         self.deadline = self.started + limits.total_seconds
         self.models = self.tools = 0
+        self.operations = 0
 
     def consume(self, category):
         if category == "model":
@@ -86,13 +103,18 @@ class Budget:
             self.tools += 1
 
     async def call(self, name, operation, *, category="dependency"):
+        self.operations += 1
+        operation_id = f"operation-{self.operations}"
         for attempt in range(2):
             remaining = self.deadline - time.monotonic()
             if remaining <= 0:
                 raise DependencyFailure("request_timeout")
             self.consume(category)
             started = time.monotonic()
-            event = {"operation": name, "attempt": attempt + 1}
+            event = {"operation": name, "operation_id": operation_id, "attempt": attempt + 1,
+                     "retry_reason": "transient" if attempt else None}
+            if category == "tool":
+                event.update(dispatched=True, arguments_valid=True)
             try:
                 timeout = min(remaining, self.limits.attempt_seconds)
                 async with asyncio.timeout(timeout):
@@ -105,7 +127,7 @@ class Budget:
             except DependencyFailure as exc:
                 error = exc
             finally:
-                event["elapsed_ms"] = round((time.monotonic() - started) * 1000)
+                event["elapsed_ms"] = (time.monotonic() - started) * 1000
                 self.events.append(event)
             event["state"] = error.code
             if not error.retryable or attempt == 1 or error.code == "request_timeout":
@@ -173,7 +195,8 @@ class Assistant:
                        "tool_calls": budget.tools, "snapshot_id": state.snapshot_id,
                        "corpus_revision": state.corpus_revision,
                        "error": response.error.code if response.error else None})
-        self.traces.save(str(trace_id), events, self.provider.execution_mode)
+        self.traces.save(str(trace_id), events, self.provider.execution_mode,
+                         elapsed_ms=(time.monotonic() - budget.started) * 1000)
         return response, http
 
     async def _dispatch(self, call, request, state, budget):
@@ -184,6 +207,7 @@ class Assistant:
             args = model.model_validate_json(call.arguments)
         except (ValidationError, ValueError):
             budget.consume("tool")
+            budget.events.append({"operation": call.name, "dispatched": False, "arguments_valid": False})
             state.invalid_tool = True
             return {"error": "invalid_tool_arguments"}
         state.attempted.add(call.name)
