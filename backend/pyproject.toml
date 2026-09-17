@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fictional-warehouse-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.141.1",
+  "pydantic==2.13.5",
+  "httpx==0.28.1",
+  "SQLAlchemy==2.0.54",
+  "alembic==1.20.0",
+  "psycopg[binary]==3.3.5",
+  "uvicorn==0.53.0",
+  "markdown-it-py==4.2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.1.1", "pytest-asyncio==1.4.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+namespaces = true
+
+[tool.pytest.ini_options]
+testpaths = ["../tests/api"]
+pythonpath = ["."]
+asyncio_mode = "auto"

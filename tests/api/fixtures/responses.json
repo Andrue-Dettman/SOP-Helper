@@ -1,0 +1,121 @@
+{
+  "procedure": {
+    "execution_mode": "offline_fixture",
+    "http_status": 200,
+    "response": {
+      "answer": "Warning: Stop if labels are missing.\n\n1. Check 2 labels.",
+      "answer_citation_ids": [
+        "cite-43c3cc301fa76f2d3ae1be86"
+      ],
+      "status": "answered",
+      "citations": [
+        {
+          "citation_id": "cite-43c3cc301fa76f2d3ae1be86",
+          "document_id": "receiving",
+          "version": "1",
+          "section_id": "inspect",
+          "title": "Inspect delivery",
+          "quoted_text": "Check 2 labels. Stop if labels are missing.",
+          "source_uri": "/api/sops/receiving/sections/inspect?version=1"
+        }
+      ],
+      "procedure_result": {
+        "state": "ok",
+        "sources": [
+          {
+            "document_id": "receiving",
+            "version": "1",
+            "section_id": "inspect",
+            "is_current": true
+          }
+        ],
+        "steps": [
+          {
+            "step_id": "step-0f8ecd57bbde0c5da0972e3a",
+            "text": "Check 2 labels.",
+            "ordinal": 1,
+            "citation_ids": [
+              "cite-43c3cc301fa76f2d3ae1be86"
+            ],
+            "explanation": null
+          }
+        ],
+        "warnings": [
+          {
+            "warning_id": "warning-d679072adc97a2c3738e41b1",
+            "text": "Stop if labels are missing.",
+            "applies_to_step_ids": [
+              "step-0f8ecd57bbde0c5da0972e3a"
+            ],
+            "citation_ids": [
+              "cite-43c3cc301fa76f2d3ae1be86"
+            ]
+          }
+        ],
+        "prerequisites": [],
+        "explanation": null,
+        "fallback_used": false
+      },
+      "inventory_result": null,
+      "clarification": null,
+      "error": null,
+      "trace_id": "27968eed-038b-4c72-abbd-b387b2b8bfeb",
+      "data_mode": "synthetic"
+    }
+  },
+  "build_shortage": {
+    "execution_mode": "offline_fixture",
+    "http_status": 200,
+    "response": {
+      "answer": "Not ready: 20 units of A1. Fictional snapshot: fictional-001.\nP1: required 40; available 5; shortage 35.",
+      "answer_citation_ids": [],
+      "status": "answered",
+      "citations": [],
+      "procedure_result": null,
+      "inventory_result": {
+        "kind": "build",
+        "state": "ok",
+        "snapshot": {
+          "snapshot_id": "fictional-001",
+          "captured_at": "2026-01-01T00:00:00Z"
+        },
+        "assembly_id": "A1",
+        "requested_units": 20,
+        "ready": false,
+        "components": [
+          {
+            "part_id": "P1",
+            "per_assembly": 2,
+            "required": 40,
+            "available": 5,
+            "shortage": 35
+          }
+        ]
+      },
+      "clarification": null,
+      "error": null,
+      "trace_id": "91fbc257-9dee-4278-8f58-f3f93eccf7a2",
+      "data_mode": "synthetic"
+    }
+  },
+  "missing_quantity": {
+    "execution_mode": "offline_fixture",
+    "http_status": 200,
+    "response": {
+      "answer": "How many units should I check?",
+      "answer_citation_ids": [],
+      "status": "needs_clarification",
+      "citations": [],
+      "procedure_result": null,
+      "inventory_result": null,
+      "clarification": {
+        "kind": "quantity",
+        "question": "How many units should I check?",
+        "choices": []
+      },
+      "error": null,
+      "trace_id": "7ea5fcd1-ec7f-41ff-bb9a-c12b398f3c2d",
+      "data_mode": "synthetic"
+    }
+  }
+}
