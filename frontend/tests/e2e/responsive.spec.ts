@@ -13,7 +13,7 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height })
     await page.goto('/')
     await sendMessage(page, 'Can we assemble 20 units of Kit A?')
-    await page.getByRole('button', { name: 'Kit A — Standard (asm-kit-a-std)' }).click()
+    await page.getByRole('button', { name: 'Kit A — Standard (ASM-KIT-A-STD)' }).click()
     await expect(page.getByText('Ready')).toBeVisible()
 
     const hasPageOverflow = await page.evaluate(

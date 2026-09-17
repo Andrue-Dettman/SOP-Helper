@@ -29,7 +29,7 @@ export function ComponentTable({ components }: ComponentTableProps) {
                 key={component.part_id}
                 className={isShort ? 'component-table__row--short' : undefined}
               >
-                <th scope="row">{component.label}</th>
+                <th scope="row">{component.part_id}</th>
                 <td>{component.required}</td>
                 <td>{formatQuantity(component.available)}</td>
                 <td>{formatQuantity(component.shortage)}</td>

@@ -38,7 +38,7 @@ function scenario(
 export function selectScenario(request: ChatRequest): MockScenario {
   const message = request.message.toLowerCase()
 
-  if (request.selection?.assembly_id === 'asm-kit-a-std' || request.selection?.assembly_id === 'asm-kit-a-hd') {
+  if (request.selection?.assembly_id === 'ASM-KIT-A-STD' || request.selection?.assembly_id === 'ASM-KIT-A-HD') {
     return scenario(buildReady)
   }
 

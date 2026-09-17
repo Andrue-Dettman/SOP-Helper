@@ -23,7 +23,7 @@ export function ClarificationPrompt({ clarification, onSelectChoice, onSubmitQua
   return (
     <div className="clarification-prompt" role="group" aria-label="Clarification needed">
       <p className="clarification-prompt__question">{clarification.question}</p>
-      {clarification.choices.length > 0 ? (
+      {clarification.choices && clarification.choices.length > 0 ? (
         <div className="clarification-prompt__choices">
           {clarification.choices.map((choice) => (
             <button

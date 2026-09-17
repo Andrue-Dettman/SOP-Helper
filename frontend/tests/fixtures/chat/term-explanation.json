@@ -14,20 +14,27 @@
     }
   ],
   "procedure_result": {
-    "state": "complete",
-    "document_id": "sop-receiving",
-    "version": "3",
-    "section_id": "sec-3",
-    "title": "Receiving Deliveries — Damage Inspection",
-    "is_current": true,
+    "state": "ok",
+    "sources": [
+      { "document_id": "sop-receiving", "version": "3", "section_id": "sec-3", "is_current": true }
+    ],
+    "warnings": [
+      {
+        "warning_id": "warn-recv-002",
+        "text": "Do not stock a pallet with unresolved damage exceptions.",
+        "applies_to_step_ids": ["step-2"],
+        "citation_ids": ["cit-recv-002"]
+      }
+    ],
+    "prerequisites": [],
+    "explanation": null,
+    "fallback_used": false,
     "steps": [
       {
         "step_id": "step-2",
-        "order": 1,
-        "original_text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
+        "ordinal": 1,
+        "text": "Inspect every pallet for visible damage. Log any exceptions on the receiving form before stocking.",
         "explanation": "An exception is any damage, shortage, or mismatch you notice. Write it on the receiving form before the pallet goes on the shelf.",
-        "is_mandatory": true,
-        "warning": "Do not stock a pallet with unresolved damage exceptions.",
         "citation_ids": ["cit-recv-002"]
       }
     ]

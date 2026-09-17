@@ -17,7 +17,7 @@ const citation: Citation = {
 
 function baseResponse(overrides: Partial<ChatResponse>): ChatResponse {
   return {
-    answer: null,
+    answer: '',
     answer_citation_ids: [],
     status: 'answered',
     citations: [],
@@ -78,18 +78,17 @@ describe('MessageBubble', () => {
       response: baseResponse({
         answer: 'Here is how.',
         procedure_result: {
-          state: 'complete',
-          document_id: 'sop-receiving',
-          version: '3',
-          section_id: 'sec-2',
-          title: 'Receiving',
-          is_current: true,
+          state: 'ok',
+          sources: [{ document_id: 'sop-receiving', version: '3', section_id: 'sec-2', is_current: true }],
+          warnings: [],
+          prerequisites: [],
+          explanation: null,
+          fallback_used: false,
           steps: [
             {
               step_id: 's1',
-              order: 1,
-              original_text: 'Verify the slip.',
-              is_mandatory: true,
+              ordinal: 1,
+              text: 'Verify the slip.',
               citation_ids: [],
             },
           ],
@@ -110,7 +109,6 @@ describe('MessageBubble', () => {
           state: 'ok',
           snapshot: { snapshot_id: 'snap-1', captured_at: '2026-09-14T08:00:00Z' },
           assembly_id: 'asm-1',
-          assembly_label: 'Kit A',
           requested_units: 20,
           ready: true,
           components: [],

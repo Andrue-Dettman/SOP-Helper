@@ -64,6 +64,13 @@ describe('EvidencePanel', () => {
     await waitFor(() => expect(screen.getByText(/not available/i)).toBeInTheDocument())
   })
 
+  it('reports unavailable rather than leaving the loading state stuck when the request throws', async () => {
+    const client = fakeClient({ getSection: vi.fn().mockRejectedValue(new Error('server error')) })
+    render(<EvidencePanel citation={citation} apiClient={client} onClose={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /view full section/i }))
+    await waitFor(() => expect(screen.getByText(/not available/i)).toBeInTheDocument())
+  })
+
   it('calls onClose when Escape is pressed inside the panel', async () => {
     const onClose = vi.fn()
     render(<EvidencePanel citation={citation} apiClient={fakeClient()} onClose={onClose} />)

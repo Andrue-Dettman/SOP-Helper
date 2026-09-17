@@ -37,7 +37,7 @@ describe('buildHistory', () => {
         id: '2',
         role: 'assistant',
         response: {
-          answer: null,
+          answer: '',
           answer_citation_ids: [],
           status: 'needs_clarification',
           citations: [],

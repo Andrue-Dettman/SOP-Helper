@@ -31,7 +31,13 @@ describe('ClarificationPrompt', () => {
     const onSelectChoice = vi.fn()
     render(<ClarificationPrompt clarification={assemblyClarification} onSelectChoice={onSelectChoice} />)
     await userEvent.click(screen.getByRole('button', { name: 'Kit A — Heavy Duty' }))
-    expect(onSelectChoice).toHaveBeenCalledWith(assemblyClarification.choices[1])
+    expect(onSelectChoice).toHaveBeenCalledWith(assemblyClarification.choices![1])
+  })
+
+  it('renders a quantity input when choices is entirely omitted, not just empty', () => {
+    const omittedChoices: Clarification = { kind: 'quantity', question: 'How many units?' }
+    render(<ClarificationPrompt clarification={omittedChoices} onSelectChoice={vi.fn()} onSubmitQuantity={vi.fn()} />)
+    expect(screen.getByRole('spinbutton', { name: /quantity/i })).toBeInTheDocument()
   })
 
   it('renders a quantity input instead of choice buttons when choices are empty', () => {

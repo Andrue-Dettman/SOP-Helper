@@ -14,20 +14,27 @@
     }
   ],
   "procedure_result": {
-    "state": "complete",
-    "document_id": "sop-shortages",
-    "version": "2",
-    "section_id": "sec-1",
-    "title": "Handling Component Shortages",
-    "is_current": true,
+    "state": "ok",
+    "sources": [
+      { "document_id": "sop-shortages", "version": "2", "section_id": "sec-1", "is_current": true }
+    ],
+    "warnings": [
+      {
+        "warning_id": "warn-shortage-001",
+        "text": "Do not reassign short components from another open build without supervisor approval.",
+        "applies_to_step_ids": ["step-1"],
+        "citation_ids": ["cit-shortage-001"]
+      }
+    ],
+    "prerequisites": [],
+    "explanation": null,
+    "fallback_used": false,
     "steps": [
       {
         "step_id": "step-1",
-        "order": 1,
-        "original_text": "When a required component is short, notify the shift supervisor before adjusting the build schedule.",
+        "ordinal": 1,
+        "text": "When a required component is short, notify the shift supervisor before adjusting the build schedule.",
         "explanation": "Tell your shift supervisor about the shortage before you change anything on the build schedule.",
-        "is_mandatory": true,
-        "warning": "Do not reassign short components from another open build without supervisor approval.",
         "citation_ids": ["cit-shortage-001"]
       }
     ]
@@ -36,14 +43,13 @@
     "kind": "build",
     "state": "ok",
     "snapshot": { "snapshot_id": "snap-2026-09-14", "captured_at": "2026-09-14T08:00:00Z" },
-    "assembly_id": "asm-kit-a-std",
-    "assembly_label": "Kit A — Standard",
+    "assembly_id": "ASM-KIT-A-STD",
     "requested_units": 20,
     "ready": false,
     "components": [
-      { "part_id": "prt-bracket-01", "label": "Mounting Bracket", "per_assembly": 2, "required": 40, "available": 120, "shortage": 0 },
-      { "part_id": "prt-bolt-m6", "label": "M6 Bolt", "per_assembly": 8, "required": 160, "available": 500, "shortage": 0 },
-      { "part_id": "prt-panel-a", "label": "Side Panel A", "per_assembly": 1, "required": 20, "available": 12, "shortage": 8 }
+      { "part_id": "MOUNTING-BRACKET", "per_assembly": 2, "required": 40, "available": 120, "shortage": 0 },
+      { "part_id": "M6-BOLT", "per_assembly": 8, "required": 160, "available": 500, "shortage": 0 },
+      { "part_id": "SIDE-PANEL-A", "per_assembly": 1, "required": 20, "available": 12, "shortage": 8 }
     ]
   },
   "clarification": null,
