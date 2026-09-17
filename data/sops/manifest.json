@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "receiving-delivery/v1.md",
+      "current": false
+    },
+    {
+      "path": "receiving-delivery/v2.md",
+      "current": true
+    },
+    {
+      "path": "damaged-delivery/v1.md",
+      "current": true
+    },
+    {
+      "path": "labeling-stock/v1.md",
+      "current": true
+    },
+    {
+      "path": "putting-stock-away/v1.md",
+      "current": true
+    },
+    {
+      "path": "counting-stock/v1.md",
+      "current": true
+    },
+    {
+      "path": "picking-assembly-parts/v1.md",
+      "current": true
+    },
+    {
+      "path": "reporting-shortages/v1.md",
+      "current": true
+    },
+    {
+      "path": "packing-assemblies/v1.md",
+      "current": true
+    }
+  ]
+}
