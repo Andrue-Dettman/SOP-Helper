@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './App.css'
 import { ChatInput } from './components/ChatInput'
 import { ChatThread } from './components/ChatThread'
@@ -20,6 +20,7 @@ function App({ apiClient: apiClientProp }: AppProps) {
   const [turns, setTurns] = useState<ConversationTurn[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null)
+  const citationTriggerRef = useRef<HTMLElement | null>(null)
   // Selection resolved through a clarification choice (e.g. a disambiguated
   // assembly) carries forward to later requests in this simplified,
   // fixture-driven flow, until a fresh clarification replaces it.
@@ -79,6 +80,17 @@ function App({ apiClient: apiClientProp }: AppProps) {
     void runRequest(lastRequest.text, lastRequest.selection, historyBase, 'replace-last')
   }
 
+  function handleActivateCitation(citation: Citation) {
+    citationTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setActiveCitation(citation)
+  }
+
+  function handleCloseEvidence() {
+    setActiveCitation(null)
+    citationTriggerRef.current?.focus()
+    citationTriggerRef.current = null
+  }
+
   return (
     <div className="app-shell">
       <FictionalDataBanner />
@@ -91,7 +103,7 @@ function App({ apiClient: apiClientProp }: AppProps) {
             turns={turns}
             isLoading={isLoading}
             activeCitationId={activeCitation?.citation_id ?? null}
-            onActivateCitation={setActiveCitation}
+            onActivateCitation={handleActivateCitation}
             onSelectChoice={handleSelectChoice}
             onSubmitQuantity={handleSubmitQuantity}
             onRetry={handleRetry}
@@ -99,7 +111,7 @@ function App({ apiClient: apiClientProp }: AppProps) {
           <ChatInput onSend={(text) => sendMessage(text)} />
         </div>
         <aside className="app-shell__evidence" aria-label="Evidence panel region">
-          <EvidencePanel citation={activeCitation} apiClient={apiClient} onClose={() => setActiveCitation(null)} />
+          <EvidencePanel citation={activeCitation} apiClient={apiClient} onClose={handleCloseEvidence} />
         </aside>
       </div>
     </div>
