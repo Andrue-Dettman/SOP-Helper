@@ -2,20 +2,15 @@
 
 ## Current status
 
-G1 (`agent/g1-api`) has a real, standalone FastAPI backend; G2
-(`agent/g2-retrieval`) has retrieval/ingestion and sample SOP data; G3
-(`agent/g3-evaluation`) has an evaluation harness; C2 (`agent/c2-frontend`)
-has a Vite/React scaffold against fixtures. None of this is merged into a
-shared baseline yet — `main` and this branch are still at the frozen-plan
-commit plus C3's own scaffolding. C1 (inventory) hasn't landed.
-
-`infra/compose.yaml` defines `db` (Postgres/pgvector) and `backend`
-(built from `infra/Dockerfile.backend`), but `backend/` itself isn't part
-of this branch — it's C3's job to package it, not to own it. Everything
-below that needs `backend/` (the `backend` compose service,
-`scripts/integration-test.sh`, `tests/integration/`) works once the
-coordinator merges `agent/g1-api` in; until then those commands/scripts
-skip or fail predictably rather than silently doing nothing useful.
+`main` merges all six worker branches: G1 (API, `backend/app/api/bootstrap.py`
+composes the real services), C1 (inventory), G2 (retrieval/ingestion/SOP
+corpus), G3 (evaluation harness), C2 (frontend, not yet wired into Compose),
+and C3 (this delivery scaffolding). The integrated backend is real and
+verified: migrated schema, seeded inventory, ingested corpus, and a
+running container answering real queries with zero provider credentials.
+The one piece that still needs `OPENAI_API_KEY` is an actual `/api/chat`
+model call — everything else (readiness, assemblies, SOP sections) runs
+on real data today.
 
 ## Local setup
 
@@ -23,16 +18,18 @@ skip or fail predictably rather than silently doing nothing useful.
    port block to your assigned worker row (see PLAN.md's "Worktree and
    merge protocol" table and `agents/ROSTER.md`). The coordinator's
    checkout uses the defaults already in `.env.example`.
-2. Bring up the database:
-   ```
-   docker compose -f infra/compose.yaml up -d db
-   ./scripts/db-health.sh
-   ```
-3. Once `backend/` exists on your branch, bring up the API too and run
-   the integration suite: `./scripts/integration-test.sh` (builds,
-   starts db+backend, waits for health, runs `tests/integration/`, tears
-   down). Without `backend/` it prints a message and exits 0.
-4. Tear down when done: `./scripts/teardown.sh`.
+2. Fresh volume, one-time per environment: `./scripts/migrate-and-seed.sh`
+   (builds the backend image, starts `db`, runs Alembic migrations, G2's
+   corpus ingestion, and C1's inventory seed — all via
+   `docker compose run`, so no local Python environment is required).
+3. Bring up the integrated API: `docker compose -f infra/compose.yaml up -d --build backend`
+   (this also starts `db` via `depends_on`). Check
+   `curl http://localhost:${API_PORT:-8100}/api/ready` — `database` and
+   `corpus` should read `ready`; `provider` reads `missing` until
+   `OPENAI_API_KEY`/`OPENAI_CHAT_MODEL` are set in `.env`.
+4. Run the integration suite end-to-end (migrate+seed, start backend,
+   run `tests/integration/`, tear down): `./scripts/integration-test.sh`.
+5. Tear down when done: `./scripts/teardown.sh`.
 
 ## Isolation rules
 
@@ -69,19 +66,28 @@ are read directly by `backend/app/main.py` and by the manual
 tests and the `offline` workflow never require them. No provider key is
 ever sent to the frontend (product invariant, see `CLAUDE.md`).
 
+Runtime and seed/migration credentials are not yet separated:
+`backend/app/inventory/db_roles.sql` defines the intended
+`warehouse_runtime_ro` (read-only) and `warehouse_seed_rw` roles, but
+nothing creates them yet and `RUNTIME_DATABASE_URL` currently uses the
+same `warehouse` user as migrations/seeding. Flagged as an open C3/G1
+follow-up in that SQL file and in `tests/integration/README.md`.
+
 ## CI
 
 - `.github/workflows/offline.yml` runs on every push/PR: validates
   `infra/compose.yaml`, lints delivery scripts with `shellcheck`, and
-  runs `scripts/integration-test.sh` (a real backend smoke test once
-  `backend/` is merged in; a clean no-op otherwise). Frontend
-  lint/type-check/test steps are added once C2's branch is merged.
+  runs `scripts/integration-test.sh` — migrates, seeds, ingests, starts
+  the real integrated backend, and runs 7 tests against it, all with
+  zero provider credentials. Frontend lint/type-check/test steps are
+  added once it's wired into Compose.
 - `.github/workflows/live-smoke.yml` is manual (`workflow_dispatch`)
-  only, gated on the `OPENAI_API_KEY` repository secret, and currently
-  just reports whether a live run is possible — the backend runs today
-  but with no real retrieval/inventory wired in yet, so there is nothing
-  meaningful to smoke-test end-to-end. It is never required to pass for
-  a merge.
+  only, gated on the `OPENAI_API_KEY` repository secret. Inventory and
+  retrieval are real now, so once credentials are configured this is
+  meant to exercise one actual `/api/chat` model round trip end-to-end;
+  it currently only reports whether that's possible; see the workflow
+  file's trailing comment for the exact next step. Never required to
+  pass for a merge.
 
 ## Troubleshooting
 

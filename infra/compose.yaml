@@ -21,27 +21,31 @@ services:
       - "${POSTGRES_PORT:-5500}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-warehouse} -d ${POSTGRES_DB:-warehouse}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  # G1's backend/app/main.py: create_app() defaults services to
-  # UnavailableServices() and the provider to unconfigured when
-  # OPENAI_API_KEY/OPENAI_CHAT_MODEL are unset, so this runs standalone
-  # today and honestly reports not_ready/temporarily_unavailable rather
-  # than faking success. Real inventory/retrieval wiring (C1/G2) and a
-  # database connection string are added once the coordinator merges
-  # those branches; see tests/integration/README.md.
+  # Runs G1's integrated factory (backend/app/api/bootstrap.py), which wires
+  # C1's inventory and G2's retrieval into the real API. It reports honest
+  # not_ready/temporarily_unavailable states on its own (no fixture
+  # substitution) until the schema is migrated and seeded — run
+  # scripts/migrate-and-seed.sh once per fresh volume. Lexical retrieval mode
+  # needs no provider key; OPENAI_API_KEY is only required for /api/chat's
+  # actual model calls.
   backend:
     build:
       context: ..
       dockerfile: infra/Dockerfile.backend
     restart: unless-stopped
+    command: ["uvicorn", "app.api.bootstrap:create_runtime_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-}
+      RUNTIME_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-warehouse}:${POSTGRES_PASSWORD:-warehouse_dev_only}@db:5432/${POSTGRES_DB:-warehouse}
+      RETRIEVAL_MODE: ${RETRIEVAL_MODE:-lexical}
     ports:
       - "${API_PORT:-8100}:8000"
     depends_on:

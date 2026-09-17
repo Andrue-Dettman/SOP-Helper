@@ -9,6 +9,11 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_FILE="$ROOT_DIR/infra/compose.yaml"
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-warehouse-main}"
 API_PORT="${API_PORT:-8100}"
+if command -v python3 >/dev/null 2>&1 && python3 --version >/dev/null 2>&1; then
+  PYTHON=python3
+else
+  PYTHON=python
+fi
 
 if [[ ! -d "$ROOT_DIR/backend" ]]; then
   echo "backend/ not present on this branch yet; skipping integration tests."
@@ -20,8 +25,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --build db backend
-"$ROOT_DIR/scripts/db-health.sh"
+"$ROOT_DIR/scripts/migrate-and-seed.sh"
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --build backend
 
 echo "Waiting for backend at http://localhost:${API_PORT}/api/health ..."
 for _ in $(seq 1 30); do
@@ -35,5 +40,5 @@ curl -sf "http://localhost:${API_PORT}/api/health" >/dev/null || {
   exit 1
 }
 
-python3 -m pip install --quiet -r "$ROOT_DIR/tests/integration/requirements.txt"
-API_PORT="$API_PORT" python3 -m pytest "$ROOT_DIR/tests/integration" -v
+"$PYTHON" -m pip install --quiet -r "$ROOT_DIR/tests/integration/requirements.txt"
+API_PORT="$API_PORT" "$PYTHON" -m pytest "$ROOT_DIR/tests/integration" -v

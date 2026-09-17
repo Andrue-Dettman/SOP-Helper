@@ -1,21 +1,28 @@
-# Demo script (planned, not runnable yet)
+# Demo script
 
-Nothing below can be run today. `backend/`, `frontend/`, and seed data do
-not exist on any branch yet; only delivery scaffolding
-(`infra/compose.yaml`, `.env.example`, `scripts/`, CI) has been built so
-far. This is the intended walkthrough once G1 (API), C1 (inventory), G2
-(retrieval), and C2 (frontend) land, kept here so the demo shape is
-decided before the UI is built around it.
+The backend, real inventory/corpus data, and every non-model endpoint
+run today (verified: `/api/ready`, `/api/assemblies`, real SOP section
+text). Each workflow below is a real `POST /api/chat` call, so it also
+needs `OPENAI_API_KEY`/`OPENAI_CHAT_MODEL` configured to get past
+`temporarily_unavailable` — that live round trip has not been exercised
+here (no key available in this environment); everything up to the model
+call has been. There is no frontend service in Compose yet, so today
+this is a `curl`-driven walkthrough, not a browser one.
 
 All data referenced below is fictional (invented SOPs, parts, and stock);
 the demo will make that explicit on screen per `docs/PROJECT_BRIEF.md`.
 
-## Setup (once implemented)
+## Setup
 
-1. `cp .env.example .env`
-2. `docker compose -f infra/compose.yaml up -d --build`
-3. `./scripts/db-health.sh`
-4. Open the frontend at `http://localhost:${FRONTEND_PORT}`.
+1. `cp .env.example .env` and set `OPENAI_API_KEY`/`OPENAI_CHAT_MODEL`
+   for a real run (leave blank to see the honest unavailable state).
+2. `./scripts/migrate-and-seed.sh` (one-time per fresh volume).
+3. `docker compose -f infra/compose.yaml up -d --build backend`
+4. `curl http://localhost:${API_PORT:-8100}/api/ready` — confirm
+   `database`/`corpus` read `ready`.
+5. Once C2's frontend is wired into Compose: open
+   `http://localhost:${FRONTEND_PORT}`. Until then, use
+   `curl -X POST http://localhost:${API_PORT:-8100}/api/chat -d '{"message": "..."}'`.
 
 ## Workflow 1: procedure lookup
 

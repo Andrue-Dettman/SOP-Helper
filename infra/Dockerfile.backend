@@ -10,5 +10,10 @@ RUN pip install --no-cache-dir -r requirements.lock
 
 COPY backend/ ./
 
+# data/ and the seed script are needed only for the one-off migrate/seed/ingest
+# commands (`docker compose run --rm backend ...`), not for serving requests.
+COPY data/ ./data
+COPY scripts/seed_inventory.py ./scripts/seed_inventory.py
+
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

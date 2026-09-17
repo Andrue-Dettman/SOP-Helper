@@ -28,13 +28,39 @@ jobs:
         run: |
           echo "::warning::No provider credentials configured. Live smoke did not run and proves nothing about live behavior."
 
-      - name: Report not yet integrated (credentials present)
+      # Inventory (C1) and retrieval (G2) are real and wired into G1's
+      # bootstrap factory as of the merge into main; only this last step
+      # (the actual OpenAI call) has not been exercised, since that
+      # requires a real key this development environment doesn't have.
+      - name: Migrate and seed
+        if: steps.creds.outputs.available == 'true'
+        run: ./scripts/migrate-and-seed.sh
+
+      - name: Start the integrated backend
+        if: steps.creds.outputs.available == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_CHAT_MODEL: ${{ secrets.OPENAI_CHAT_MODEL }}
+        run: docker compose -f infra/compose.yaml up -d --build backend
+
+      - name: Confirm the backend reports fully ready
         if: steps.creds.outputs.available == 'true'
         run: |
-          echo "::warning::Provider credentials are present, and G1's backend runs, but C1 (inventory) and G2 (retrieval) are not wired into it yet. A live call would only exercise provider connectivity, not a real tool-calling answer, so this still does not run."
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:${API_PORT:-8100}/api/ready && break
+            sleep 1
+          done
+          curl -sf http://localhost:${API_PORT:-8100}/api/ready | grep -q '"status":"ready"'
 
-      # Once C1/G2 are wired into G1's Services implementation:
-      #   docker compose -f infra/compose.yaml up -d --build
-      #   ./scripts/db-health.sh
-      #   curl --fail http://localhost:${API_PORT:-8100}/api/ready
-      # and only then exercise one real chat/tool-call round trip.
+      - name: Exercise one real chat round trip
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          response=$(curl -sf -X POST http://localhost:${API_PORT:-8100}/api/chat \
+            -H "Content-Type: application/json" \
+            -d '{"message":"How do I receive a delivery?"}')
+          echo "$response"
+          echo "$response" | python3 -c "import json,sys; body=json.load(sys.stdin); assert body['status'] in ('answered','needs_clarification','insufficient_evidence'), body['status']"
+
+      - name: Tear down
+        if: always() && steps.creds.outputs.available == 'true'
+        run: ./scripts/teardown.sh
