@@ -17,8 +17,8 @@ from app.contracts.services import DependencyFailure, UnavailableServices
 from app.providers.openai import OpenAIChatProvider
 
 
-def create_app(*, services=None, provider=None, limits=Limits()) -> FastAPI:
-    app = FastAPI(title="Fictional Warehouse Assistant", version="1.0.0")
+def create_app(*, services=None, provider=None, limits=Limits(), lifespan=None) -> FastAPI:
+    app = FastAPI(title="Fictional Warehouse Assistant", version="1.0.0", lifespan=lifespan)
     app.state.services = services if services is not None else UnavailableServices()
     provider = provider if provider is not None else OpenAIChatProvider(
         os.environ.get("OPENAI_API_KEY", ""), os.environ.get("OPENAI_CHAT_MODEL", ""))
