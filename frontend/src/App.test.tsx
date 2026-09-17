@@ -49,6 +49,19 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
+  it('returns focus to the triggering chip when Escape closes the evidence panel', async () => {
+    renderApp()
+    await sendMessage('How do I receive a delivery?')
+
+    await waitFor(() => expect(screen.getAllByRole('button', { name: /dock intake/i }).length).toBeGreaterThan(0))
+    const [chip] = screen.getAllByRole('button', { name: /dock intake/i })
+    await userEvent.click(chip)
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Evidence' })).toHaveFocus())
+
+    await userEvent.keyboard('{Escape}')
+    expect(chip).toHaveFocus()
+  })
+
   it('shows a retry action on a temporarily-unavailable response and recovers', async () => {
     renderApp()
     await sendMessage('The system seems unavailable')

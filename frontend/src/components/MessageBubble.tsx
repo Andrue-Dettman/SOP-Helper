@@ -15,6 +15,8 @@ export interface MessageBubbleProps {
   onSelectChoice: (choice: ClarificationChoice) => void
   onSubmitQuantity: (quantity: number) => void
   onRetry: () => void
+  /** Lets ChatThread move focus to a newly added answer; unused for a user's own message. */
+  bubbleRef?: (element: HTMLDivElement | null) => void
 }
 
 export function MessageBubble({
@@ -24,10 +26,11 @@ export function MessageBubble({
   onSelectChoice,
   onSubmitQuantity,
   onRetry,
+  bubbleRef,
 }: MessageBubbleProps) {
   if (turn.role === 'user') {
     return (
-      <div className="message-bubble message-bubble--user">
+      <div className="message-bubble message-bubble--user" ref={bubbleRef} tabIndex={-1}>
         <p>{turn.text}</p>
       </div>
     )
@@ -35,7 +38,7 @@ export function MessageBubble({
 
   if (turn.role === 'assistant-error') {
     return (
-      <div className="message-bubble message-bubble--assistant">
+      <div className="message-bubble message-bubble--assistant" ref={bubbleRef} tabIndex={-1}>
         <StatusBanner variant="network_error" onRetry={onRetry} />
       </div>
     )
@@ -45,7 +48,7 @@ export function MessageBubble({
 
   if (response.status === 'insufficient_evidence') {
     return (
-      <div className="message-bubble message-bubble--assistant">
+      <div className="message-bubble message-bubble--assistant" ref={bubbleRef} tabIndex={-1}>
         <StatusBanner variant="insufficient_evidence" />
       </div>
     )
@@ -53,7 +56,7 @@ export function MessageBubble({
 
   if (response.status === 'temporarily_unavailable') {
     return (
-      <div className="message-bubble message-bubble--assistant">
+      <div className="message-bubble message-bubble--assistant" ref={bubbleRef} tabIndex={-1}>
         <StatusBanner
           variant="temporarily_unavailable"
           message={response.error?.message}
@@ -65,7 +68,7 @@ export function MessageBubble({
 
   if (response.status === 'needs_clarification' && response.clarification) {
     return (
-      <div className="message-bubble message-bubble--assistant">
+      <div className="message-bubble message-bubble--assistant" ref={bubbleRef} tabIndex={-1}>
         <ClarificationPrompt
           clarification={response.clarification}
           onSelectChoice={onSelectChoice}
@@ -82,7 +85,7 @@ export function MessageBubble({
   const answerCitations = resolveCitations(response.answer_citation_ids, response.citations)
 
   return (
-    <div className="message-bubble message-bubble--assistant">
+    <div className="message-bubble message-bubble--assistant" ref={bubbleRef} tabIndex={-1}>
       {response.answer && (
         <p className="message-bubble__answer">
           {response.answer}

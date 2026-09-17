@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ChatThread } from './ChatThread'
 import type { ConversationTurn } from '../lib/conversation'
 
@@ -7,19 +8,40 @@ const turns: ConversationTurn[] = [
   { id: '1', role: 'user', text: 'How do I receive a delivery?' },
 ]
 
+function baseProps(extra: Partial<Parameters<typeof ChatThread>[0]> = {}): Parameters<typeof ChatThread>[0] {
+  return {
+    turns,
+    isLoading: false,
+    activeCitationId: null,
+    onActivateCitation: vi.fn(),
+    onSelectChoice: vi.fn(),
+    onSubmitQuantity: vi.fn(),
+    onRetry: vi.fn(),
+    ...extra,
+  }
+}
+
 function renderThread(extra: Partial<Parameters<typeof ChatThread>[0]> = {}) {
-  return render(
-    <ChatThread
-      turns={turns}
-      isLoading={false}
-      activeCitationId={null}
-      onActivateCitation={vi.fn()}
-      onSelectChoice={vi.fn()}
-      onSubmitQuantity={vi.fn()}
-      onRetry={vi.fn()}
-      {...extra}
-    />,
-  )
+  return render(<ChatThread {...baseProps(extra)} />)
+}
+
+function answeredTurn(id: string): ConversationTurn {
+  return {
+    id,
+    role: 'assistant',
+    response: {
+      answer: 'Verify the packing slip.',
+      answer_citation_ids: [],
+      status: 'answered',
+      citations: [],
+      procedure_result: null,
+      inventory_result: null,
+      clarification: null,
+      error: null,
+      trace_id: 't',
+      data_mode: 'synthetic',
+    },
+  }
 }
 
 describe('ChatThread', () => {
@@ -42,5 +64,53 @@ describe('ChatThread', () => {
   it('hides the loading indicator once the request resolves', () => {
     renderThread({ isLoading: false })
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('moves focus to a newly added assistant answer', () => {
+    const { rerender } = renderThread({ turns: [turns[0]] })
+    rerender(<ChatThread {...baseProps({ turns: [turns[0], answeredTurn('2')] })} />)
+    expect(screen.getByText('Verify the packing slip.').closest('[tabindex="-1"]')).toHaveFocus()
+  })
+
+  it('does not steal focus while the user is typing the next message', async () => {
+    const { rerender } = render(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0]] })} />
+      </div>,
+    )
+    const textarea = screen.getByRole('textbox', { name: /ask a question/i })
+    await userEvent.type(textarea, 'a follow-up in progress')
+    rerender(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0], answeredTurn('2')] })} />
+      </div>,
+    )
+    expect(textarea).toHaveFocus()
+  })
+
+  it('still moves focus to the answer when the input is focused but empty (just submitted)', () => {
+    const { rerender } = render(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0]] })} />
+      </div>,
+    )
+    screen.getByRole('textbox', { name: /ask a question/i }).focus()
+    rerender(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0], answeredTurn('2')] })} />
+      </div>,
+    )
+    expect(screen.getByText('Verify the packing slip.').closest('[tabindex="-1"]')).toHaveFocus()
+  })
+
+  it('does not move focus when the newly added turn is the user’s own message', () => {
+    const secondUserTurn: ConversationTurn = { id: '2', role: 'user', text: 'A follow-up question' }
+    const { rerender } = renderThread({ turns: [turns[0]] })
+    rerender(<ChatThread {...baseProps({ turns: [turns[0], secondUserTurn] })} />)
+    expect(document.body).toHaveFocus()
   })
 })
