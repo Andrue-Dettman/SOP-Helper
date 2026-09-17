@@ -1,0 +1,40 @@
+name: live-smoke
+
+# Manual only. Never required for merges. Exercises real provider
+# credentials when configured; otherwise explicitly reports that no live
+# check ran. A skipped or unavailable run is not a passing live-quality
+# claim (see docs/CONTRACTS.md and PLAN.md's offline/live CI split).
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for provider credentials
+        id: creds
+        run: |
+          if [[ -z "${{ secrets.OPENAI_API_KEY }}" ]]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report unavailable (no credentials)
+        if: steps.creds.outputs.available == 'false'
+        run: |
+          echo "::warning::No provider credentials configured. Live smoke did not run and proves nothing about live behavior."
+
+      - name: Report not yet integrated (credentials present)
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          echo "::warning::Provider credentials are present, and G1's backend runs, but C1 (inventory) and G2 (retrieval) are not wired into it yet. A live call would only exercise provider connectivity, not a real tool-calling answer, so this still does not run."
+
+      # Once C1/G2 are wired into G1's Services implementation:
+      #   docker compose -f infra/compose.yaml up -d --build
+      #   ./scripts/db-health.sh
+      #   curl --fail http://localhost:${API_PORT:-8100}/api/ready
+      # and only then exercise one real chat/tool-call round trip.

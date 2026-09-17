@@ -1,0 +1,32 @@
+name: offline
+
+# Hermetic checks only: no provider credentials, no paid API calls, no
+# dependency on live LLM/embedding behavior. Runs on every push/PR so it
+# can gate merges per PLAN.md's offline/live CI split.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  offline-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate infra/compose.yaml
+        run: docker compose -f infra/compose.yaml config
+
+      - name: Shellcheck delivery scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Backend integration smoke tests
+        # No-op on a branch without backend/ yet (script exits 0); runs
+        # for real once G1's branch is part of this checkout. No provider
+        # credentials required — see tests/integration/test_backend_smoke.py.
+        run: ./scripts/integration-test.sh
+
+      # Backend lint/type-check/unit tests (G1, C1, G2) and frontend
+      # lint/type-check/unit tests (C2) are added here once those
+      # worktrees land their dependency manifests. See docs/CONTRACTS.md
+      # and agents/ROSTER.md for ownership.
