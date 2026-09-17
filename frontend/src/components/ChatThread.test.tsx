@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ChatThread } from './ChatThread'
 import type { ConversationTurn } from '../lib/conversation'
 
@@ -71,7 +72,25 @@ describe('ChatThread', () => {
     expect(screen.getByText('Verify the packing slip.').closest('[tabindex="-1"]')).toHaveFocus()
   })
 
-  it('does not steal focus from the chat input while the user is typing', () => {
+  it('does not steal focus while the user is typing the next message', async () => {
+    const { rerender } = render(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0]] })} />
+      </div>,
+    )
+    const textarea = screen.getByRole('textbox', { name: /ask a question/i })
+    await userEvent.type(textarea, 'a follow-up in progress')
+    rerender(
+      <div>
+        <textarea aria-label="Ask a question" />
+        <ChatThread {...baseProps({ turns: [turns[0], answeredTurn('2')] })} />
+      </div>,
+    )
+    expect(textarea).toHaveFocus()
+  })
+
+  it('still moves focus to the answer when the input is focused but empty (just submitted)', () => {
     const { rerender } = render(
       <div>
         <textarea aria-label="Ask a question" />
@@ -85,7 +104,7 @@ describe('ChatThread', () => {
         <ChatThread {...baseProps({ turns: [turns[0], answeredTurn('2')] })} />
       </div>,
     )
-    expect(screen.getByRole('textbox', { name: /ask a question/i })).toHaveFocus()
+    expect(screen.getByText('Verify the packing slip.').closest('[tabindex="-1"]')).toHaveFocus()
   })
 
   it('does not move focus when the newly added turn is the user’s own message', () => {

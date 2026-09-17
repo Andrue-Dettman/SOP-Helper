@@ -33,9 +33,13 @@ export function ChatThread({
       return
     }
     lastSeenTurnId.current = lastTurn.id
-    // Only a new answer (not the user's own message) claims focus, and never
-    // while the user is actively typing the next question.
-    if (lastTurn.role === 'user' || document.activeElement?.tagName === 'TEXTAREA') {
+    // Only a new answer (not the user's own message) claims focus. Skip it
+    // if the user has already started typing the next question — an empty,
+    // merely-focused textarea (the normal post-submit state) doesn't count.
+    const active = document.activeElement
+    const isComposingNextMessage =
+      active instanceof HTMLTextAreaElement && active.value.trim() !== ''
+    if (lastTurn.role === 'user' || isComposingNextMessage) {
       return
     }
     bubbleElements.current.get(lastTurn.id)?.focus()
