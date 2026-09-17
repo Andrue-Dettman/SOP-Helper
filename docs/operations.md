@@ -2,10 +2,20 @@
 
 ## Current status
 
-Only the delivery scaffolding described below exists so far: environment
-template, the Postgres/pgvector Compose service, delivery scripts, and CI
-skeletons. No backend, frontend, or seed data has been implemented by any
-worker yet. This document will grow as G1/C1/G2/C2/G3 land their pieces.
+G1 (`agent/g1-api`) has a real, standalone FastAPI backend; G2
+(`agent/g2-retrieval`) has retrieval/ingestion and sample SOP data; G3
+(`agent/g3-evaluation`) has an evaluation harness; C2 (`agent/c2-frontend`)
+has a Vite/React scaffold against fixtures. None of this is merged into a
+shared baseline yet — `main` and this branch are still at the frozen-plan
+commit plus C3's own scaffolding. C1 (inventory) hasn't landed.
+
+`infra/compose.yaml` defines `db` (Postgres/pgvector) and `backend`
+(built from `infra/Dockerfile.backend`), but `backend/` itself isn't part
+of this branch — it's C3's job to package it, not to own it. Everything
+below that needs `backend/` (the `backend` compose service,
+`scripts/integration-test.sh`, `tests/integration/`) works once the
+coordinator merges `agent/g1-api` in; until then those commands/scripts
+skip or fail predictably rather than silently doing nothing useful.
 
 ## Local setup
 
@@ -13,12 +23,16 @@ worker yet. This document will grow as G1/C1/G2/C2/G3 land their pieces.
    port block to your assigned worker row (see PLAN.md's "Worktree and
    merge protocol" table and `agents/ROSTER.md`). The coordinator's
    checkout uses the defaults already in `.env.example`.
-2. Bring up the database only (the only service defined so far):
+2. Bring up the database:
    ```
    docker compose -f infra/compose.yaml up -d db
    ./scripts/db-health.sh
    ```
-3. Tear down when done: `./scripts/teardown.sh`.
+3. Once `backend/` exists on your branch, bring up the API too and run
+   the integration suite: `./scripts/integration-test.sh` (builds,
+   starts db+backend, waits for health, runs `tests/integration/`, tears
+   down). Without `backend/` it prints a message and exits 0.
+4. Tear down when done: `./scripts/teardown.sh`.
 
 ## Isolation rules
 
@@ -49,23 +63,25 @@ alternative if one is already taken locally.
 
 ## Secrets
 
-Real `.env` files are gitignored. `LLM_PROVIDER_API_KEY` and
-`EMBEDDING_PROVIDER_API_KEY` are only read by the manual `live-smoke`
-GitHub Actions workflow as repository secrets; offline tests and the
-`offline` workflow never require them. No provider key is ever sent to
-the frontend (product invariant, see `CLAUDE.md`).
+Real `.env` files are gitignored. `OPENAI_API_KEY`/`OPENAI_CHAT_MODEL`
+are read directly by `backend/app/main.py` and by the manual
+`live-smoke` GitHub Actions workflow as repository secrets; offline
+tests and the `offline` workflow never require them. No provider key is
+ever sent to the frontend (product invariant, see `CLAUDE.md`).
 
 ## CI
 
 - `.github/workflows/offline.yml` runs on every push/PR: validates
-  `infra/compose.yaml`, lints delivery scripts with `shellcheck`. Backend
-  and frontend lint/type-check/test steps are added once G1/C1/G2/C2 land
-  their dependency manifests.
+  `infra/compose.yaml`, lints delivery scripts with `shellcheck`, and
+  runs `scripts/integration-test.sh` (a real backend smoke test once
+  `backend/` is merged in; a clean no-op otherwise). Frontend
+  lint/type-check/test steps are added once C2's branch is merged.
 - `.github/workflows/live-smoke.yml` is manual (`workflow_dispatch`)
-  only, gated on the `LLM_PROVIDER_API_KEY` repository secret, and
-  currently just reports whether a live run is possible — there is
-  nothing to smoke-test until the API exists. It is never required to
-  pass for a merge.
+  only, gated on the `OPENAI_API_KEY` repository secret, and currently
+  just reports whether a live run is possible — the backend runs today
+  but with no real retrieval/inventory wired in yet, so there is nothing
+  meaningful to smoke-test end-to-end. It is never required to pass for
+  a merge.
 
 ## Troubleshooting
 

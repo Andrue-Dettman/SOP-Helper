@@ -17,7 +17,7 @@ jobs:
       - name: Check for provider credentials
         id: creds
         run: |
-          if [[ -z "${{ secrets.LLM_PROVIDER_API_KEY }}" ]]; then
+          if [[ -z "${{ secrets.OPENAI_API_KEY }}" ]]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
           else
             echo "available=true" >> "$GITHUB_OUTPUT"
@@ -28,12 +28,12 @@ jobs:
         run: |
           echo "::warning::No provider credentials configured. Live smoke did not run and proves nothing about live behavior."
 
-      - name: Report not yet implemented (credentials present)
+      - name: Report not yet integrated (credentials present)
         if: steps.creds.outputs.available == 'true'
         run: |
-          echo "::warning::Provider credentials are present, but the application (G1 API, C1 inventory, G2 retrieval, C2 frontend) is not implemented yet. There is nothing to smoke-test."
+          echo "::warning::Provider credentials are present, and G1's backend runs, but C1 (inventory) and G2 (retrieval) are not wired into it yet. A live call would only exercise provider connectivity, not a real tool-calling answer, so this still does not run."
 
-      # Once GET /api/ready is implemented, replace the steps above with:
+      # Once C1/G2 are wired into G1's Services implementation:
       #   docker compose -f infra/compose.yaml up -d --build
       #   ./scripts/db-health.sh
       #   curl --fail http://localhost:${API_PORT:-8100}/api/ready

@@ -1,11 +1,11 @@
-# Owned by C3 (docs/CONTRACTS.md, agents/ROSTER.md). One Postgres instance
-# per worktree, isolated by COMPOSE_PROJECT_NAME, port, and volume name so
-# no worker's `docker compose down -v` can touch another worker's data.
+# Owned by C3 (docs/CONTRACTS.md, agents/ROSTER.md). One stack per
+# worktree, isolated by COMPOSE_PROJECT_NAME, port, and volume name so no
+# worker's `docker compose down -v` can touch another worker's data.
 #
-# Backend and frontend services are intentionally not defined here yet.
-# Adding them now would mean guessing G1's application bootstrap and C2's
-# frontend dev-server setup before either exists. They are added once
-# those worktrees land their dependency manifests; see docs/operations.md.
+# The frontend service is intentionally not defined here yet: C2's Vite
+# dev server setup (agent/c2-frontend) hasn't been reviewed for container
+# use (host binding, dev vs. build mode). It is added once that's settled;
+# see docs/operations.md.
 
 name: ${COMPOSE_PROJECT_NAME:-warehouse-main}
 
@@ -26,6 +26,27 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # G1's backend/app/main.py: create_app() defaults services to
+  # UnavailableServices() and the provider to unconfigured when
+  # OPENAI_API_KEY/OPENAI_CHAT_MODEL are unset, so this runs standalone
+  # today and honestly reports not_ready/temporarily_unavailable rather
+  # than faking success. Real inventory/retrieval wiring (C1/G2) and a
+  # database connection string are added once the coordinator merges
+  # those branches; see tests/integration/README.md.
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-}
+    ports:
+      - "${API_PORT:-8100}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db-data:

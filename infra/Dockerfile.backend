@@ -1,0 +1,14 @@
+# Owned by C3 (docs/CONTRACTS.md). Built from repo root context so it can
+# COPY backend/ directly; run `docker compose -f infra/compose.yaml build`
+# from the repo root.
+FROM python:3.12-slim
+
+WORKDIR /srv/backend
+
+COPY backend/requirements.lock ./requirements.lock
+RUN pip install --no-cache-dir -r requirements.lock
+
+COPY backend/ ./
+
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

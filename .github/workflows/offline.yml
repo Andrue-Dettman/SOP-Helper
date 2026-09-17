@@ -20,9 +20,13 @@ jobs:
       - name: Shellcheck delivery scripts
         run: shellcheck scripts/*.sh
 
+      - name: Backend integration smoke tests
+        # No-op on a branch without backend/ yet (script exits 0); runs
+        # for real once G1's branch is part of this checkout. No provider
+        # credentials required — see tests/integration/test_backend_smoke.py.
+        run: ./scripts/integration-test.sh
+
       # Backend lint/type-check/unit tests (G1, C1, G2) and frontend
       # lint/type-check/unit tests (C2) are added here once those
-      # worktrees land their dependency manifests. The mocked-transport
-      # integration suite in tests/integration/ is added once G1's API
-      # exists to run it against. See docs/CONTRACTS.md and
-      # agents/ROSTER.md for ownership.
+      # worktrees land their dependency manifests. See docs/CONTRACTS.md
+      # and agents/ROSTER.md for ownership.
